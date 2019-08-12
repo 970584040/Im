@@ -68,12 +68,13 @@ func UploadLocal(writer http.ResponseWriter,
 
 //即将删掉,定期更新
 const (
-	AccessKeyId     = "5p2RZKnrUanMuQw9"
-	AccessKeySecret = "bsNmjU8Au08axedV40TRPCS5XIFAkK"
-	EndPoint        = "oss-cn-shenzhen.aliyuncs.com"
-	Bucket          = "winliondev"
+	AccessKeyId     = "you AccessKeyId"
+	AccessKeySecret = "you AccessKeySecret"
+	EndPoint        = "you EndPoint"
+	Bucket          = "you Bucket"
 )
 
+//上传到云存储
 //权限设置为公共读状态
 //需要安装
 func UploadOss(writer http.ResponseWriter,
