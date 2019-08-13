@@ -103,7 +103,7 @@ func (service *ContactService) JoinCommunity(userId, comId int64) error {
 		_, err := DbEngin.InsertOne(cot)
 		return err
 	} else {
-		return nil
+		return errors.New("您已经在群中")
 	}
 
 }

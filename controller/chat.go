@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	"gopkg.in/fatih/set.v0"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"sync"
@@ -116,7 +117,6 @@ func Chat(writer http.ResponseWriter,
 	//todo 完成接收逻辑
 	go recvproc(node)
 	//
-	sendMsg(userId, []byte("hello,world!"))
 }
 
 //发送协程
@@ -143,6 +143,70 @@ func recvproc(node *Node) {
 		}
 		//todo 对data进一步处理
 		dispatch(data)
+		//bordMsg(data) //使用udp广播数据
+	}
+}
+
+func init() {
+	go udpsendproc()
+	go udprecvproc()
+}
+
+var sendchan chan []byte = make(chan []byte, 1024)
+
+//广播消息
+func bordMsg(data []byte) {
+	sendchan <- data
+}
+
+//发送udp消息
+func udpsendproc() {
+	//使用udp拨号
+	con, err := net.DialUDP("udp", nil,
+		&net.UDPAddr{
+			IP:   net.IPv4(192, 168, 0, 255),
+			Port: 3000,
+		})
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	defer con.Close()
+	log.Println(123)
+	//发送消息
+	for {
+		select {
+		case data := <-sendchan:
+			_, err = con.Write(data)
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
+		}
+	}
+}
+
+//接收udp消息
+func udprecvproc() {
+	con, err := net.ListenUDP("udp", &net.UDPAddr{
+		IP:   net.IPv4zero,
+		Port: 3000,
+	})
+	defer con.Close()
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	//处理udp发送的消息
+	for {
+		var buf = make([]byte, 1024)
+		n, err := con.Read(buf)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		//直接数据处理
+		dispatch(buf[0:n])
 	}
 }
 
@@ -150,6 +214,7 @@ func recvproc(node *Node) {
 func dispatch(data []byte) {
 	//todo 解析data为message
 	msg := Message{}
+	log.Println("dispatch data", data)
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
 		log.Println(err.Error())
