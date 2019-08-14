@@ -40,7 +40,5 @@ go get github.com/go-xorm/xorm
 go get -u github.com/go-sql-driver/mysql
 
 
-注：此项目为看完相关视频后编写，不否认借鉴了视频中的代码
-
 
 
